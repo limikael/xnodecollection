@@ -2,21 +2,54 @@ var Collection = require("../../src/Collection");
 var CollectionView = require("../../src/CollectionView");
 var inherits = require("inherits");
 var xnode = require("xnode");
+var EventDispatcher = require("yaed");
 
 function ItemRenderer() {
 	xnode.Div.call(this);
 
-	this.style.height = "20px";
+	this.style.position = "relative";
+	this.style.height = "40px";
 	this.style.background = "#ff0000";
-	//this.style.width = "50%";
-	this.innerHTML = "hello";
+	this.style.borderBottom = "1px solid black";
+
+	this.input = new xnode.Input();
+	this.input.style.position = "absolute";
+	this.input.style.left = "10px";
+	this.input.style.top = "10px";
+
+	var scope = this;
+
+	this.input.on("change", function() {
+		scope.trigger("hello");
+
+		console.log("change: " + scope.input.value + " m: " + scope.itemModel);
+		if (scope.itemModel)
+			scope.itemModel.setValue(scope.input.value);
+	});
+
+	this.appendChild(this.input);
+	//	this.innerHTML = "hello";
 }
 
 inherits(ItemRenderer, xnode.Div);
+EventDispatcher.init(ItemRenderer);
 
-ItemRenderer.prototype.setData = function(data) {
-	console.log("setting data...");
-	this.innerHTML = data+"...";
+ItemRenderer.prototype.setData = function(itemModel) {
+	this.itemModel = itemModel;
+	console.log("setting data");
+	this.input.value = itemModel.getValue();
+}
+
+function ItemModel(v) {
+	this.value = v;
+}
+
+ItemModel.prototype.getValue = function() {
+	return this.value;
+}
+
+ItemModel.prototype.setValue = function(v) {
+	this.value = v;
 }
 
 function App() {
@@ -36,8 +69,8 @@ function App() {
 	b.on("click", this.onButtonClick.bind(this));
 
 	this.collection = new Collection();
-	this.collection.addItem("hello");
-	this.collection.addItem("world");
+	this.collection.addItem(new ItemModel("hello"));
+	this.collection.addItem(new ItemModel("world"));
 
 	this.collectionView = new CollectionView();
 	this.collectionView.style.position = "absolute";
@@ -57,7 +90,7 @@ function App() {
 inherits(App, xnode.Div);
 
 App.prototype.onButtonClick = function() {
-	this.collection.addItem("test");
+	this.collection.addItem(new ItemModel("test"));
 }
 
 window.onload = function() {
