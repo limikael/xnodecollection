@@ -11,6 +11,9 @@ function CollectionView() {
 
 	this.itemRenderers = [];
 	this.itemRendererClass = null;
+	this.itemRendererFactory = null;
+	this.itemControllerClass = null;
+	this.itemControllerFactory = null;
 	this.dataSource = null;
 }
 
@@ -21,7 +24,46 @@ inherits(CollectionView, xnode.Div);
  * @method setItemRendererClass
  */
 CollectionView.prototype.setItemRendererClass = function(value) {
+	if (value && typeof value != "function")
+		throw new Error("The item renderer class should be a function");
+
 	this.itemRendererClass = value;
+	this.refreshAllItemRenderers();
+}
+
+/**
+ * Set item renderer factory.
+ * @method setItemRendererFactory
+ */
+CollectionView.prototype.setItemRendererFactory = function(value) {
+	if (value && typeof value != "function")
+		throw new Error("The item renderer factory should be a function");
+
+	this.itemRendererFactory = value;
+	this.refreshAllItemRenderers();
+}
+
+/**
+ * Set item controller class.
+ * @method setItemRendererClass
+ */
+CollectionView.prototype.setItemControllerClass = function(value) {
+	if (value && typeof value != "function")
+		throw new Error("The item renderer class should be a function");
+
+	this.itemControllerClass = value;
+	this.refreshAllItemRenderers();
+}
+
+/**
+ * Set item controller factory.
+ * @method setItemRendererFactory
+ */
+CollectionView.prototype.setItemControllerFactory = function(value) {
+	if (value && typeof value != "function")
+		throw new Error("The item renderer factory should be a function");
+
+	this.itemControllerFactory = value;
 	this.refreshAllItemRenderers();
 }
 
@@ -58,23 +100,34 @@ CollectionView.prototype.onDataSourceChange = function() {
  * @private
  */
 CollectionView.prototype.refreshAllItemRenderers = function() {
-	for (var i = 0; i < this.itemRenderers.length; i++)
+	for (var i = 0; i < this.itemRenderers.length; i++) {
+		if (this.itemRenderers[i].__controller)
+			this.itemRenderers[i].__controller.setData(null);
+
+		else
+			this.itemRenderers[i].setData(null);
+
 		this.removeChild(this.itemRenderers[i]);
+	}
 
 	this.itemRenderers = [];
-
-	//console.log("refresh..");
 
 	if (!this.dataSource)
 		return;
 
-	if (!this.itemRendererClass)
+	if (!this.itemRendererClass && !this.itemRendererFactory)
 		return;
 
 	for (var i = 0; i < this.dataSource.getLength(); i++) {
 		var data = this.dataSource.getItemAt(i);
-		var renderer = this.createItemRendererForData(data);
-		renderer.setData(data);
+		var renderer = this.createItemRenderer();
+
+		if (this.itemControllerClass || this.itemControllerFactory) {
+			renderer.__controller = this.createItemController(renderer);
+			renderer.__controller.setData(data);
+		} else {
+			renderer.setData(data);
+		}
 
 		this.itemRenderers.push(renderer);
 		this.appendChild(renderer);
@@ -82,12 +135,54 @@ CollectionView.prototype.refreshAllItemRenderers = function() {
 }
 
 /**
- * Create item renderer suitable for rendering specified data.
- * @method createItemRendererForData
+ * Create item renderer.
+ * @method createItemRenderer
  * @private
  */
-CollectionView.prototype.createItemRendererForData = function(data) {
-	return new this.itemRendererClass();
+CollectionView.prototype.createItemRenderer = function() {
+	if (this.itemRendererFactory)
+		return this.itemRendererFactory();
+
+	if (this.itemRendererClass)
+		return new this.itemRendererClass();
+
+	throw new Error("Can't create item renderer!");
 }
+
+/**
+ * Create item controller.
+ * @method createItemController
+ * @private
+ */
+CollectionView.prototype.createItemController = function(renderer) {
+	if (this.itemControllerFactory)
+		return this.itemControllerFactory(renderer);
+
+	if (this.itemControllerClass)
+		return new this.itemControllerClass(renderer);
+
+	throw new Error("Can't create item controller!");
+}
+
+/**
+ * Create an item renderer factory that can be used to keep the view
+ * and controller apart.
+ */
+/*CollectionView.createControllerFactory = function(viewClass, controllerClass) {
+	console.log("creating controller factory...");
+
+	function factory() {
+		var viewInstance = new viewClass();
+		var controllerInstance = new controllerClass(viewInstance);
+
+		viewInstance.setData = function(data) {
+			controllerInstance.setData(data);
+		}
+
+		return viewInstance;
+	}
+
+	return factory;
+}*/
 
 module.exports = CollectionView;

@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 
 			function(next) {
 				var job = new qsub("./node_modules/.bin/browserify");
-				job.arg("--debug", "-o", "test/view/mvctest.bundle.js", "test/view/mvctest.js");
+				job.arg("--debug", "-o", "test/mvctest/mvctest.bundle.js", "test/mvctest/mvctest.js");
 				job.show().expect(0);
 
 				job.run().then(next, grunt.fail.fatal);
