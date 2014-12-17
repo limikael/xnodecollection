@@ -1,4 +1,5 @@
 module.exports = {
 	Collection: require("./Collection"),
-	CollectionView: require("./CollectionView")
+	CollectionView: require("./CollectionView"),
+	CollectionViewManager: require("./CollectionViewManager")
 };
