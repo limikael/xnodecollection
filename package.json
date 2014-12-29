@@ -3,7 +3,7 @@
   "version": "0.0.5",
   "description": "",
   "peerDependencies": {
-    "xnode": "^0.0.8",
+    "xnode": "^0.0.8"
   },
   "dependencies": {
     "inherits": "^2.0.1",
