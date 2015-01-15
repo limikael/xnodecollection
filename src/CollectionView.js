@@ -1,7 +1,7 @@
 var EventDispatcher = require("yaed");
 var xnode = require("xnode");
 var inherits = require("inherits");
-var CollectionViewManager=require("./CollectionViewManager");
+var CollectionViewManager = require("./CollectionViewManager");
 
 /**
  * CollectionView.
@@ -10,7 +10,7 @@ var CollectionViewManager=require("./CollectionViewManager");
 function CollectionView() {
 	xnode.Div.call(this);
 
-	this.manager=new CollectionViewManager(this);
+	this.manager = new CollectionViewManager(this);
 }
 
 inherits(CollectionView, xnode.Div);

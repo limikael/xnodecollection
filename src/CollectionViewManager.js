@@ -1,6 +1,7 @@
 var EventDispatcher = require("yaed");
 var xnode = require("xnode");
 var inherits = require("inherits");
+var EventDispatcher = require("yaed");
 
 /**
  * CollectionViewManager.
@@ -18,13 +19,15 @@ function CollectionViewManager(target) {
 	this.setTarget(target);
 }
 
+inherits(CollectionViewManager, EventDispatcher);
+
 /**
  * Set target.
  * @method setTarget
  */
 CollectionViewManager.prototype.setTarget = function(value) {
 	this.removeAllItemRenderers();
-	this.target=value;
+	this.target = value;
 	this.removeAllItemRenderers();
 }
 
@@ -153,6 +156,8 @@ CollectionViewManager.prototype.refreshAllItemRenderers = function() {
 		this.itemRenderers.push(renderer);
 		this.target.appendChild(renderer);
 	}
+
+	this.trigger("postUpdate");
 }
 
 /**
